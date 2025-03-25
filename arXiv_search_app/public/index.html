@@ -1,0 +1,205 @@
+<!-- public/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>arXiv Search Interface</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .paper-card {
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+        }
+        .paper-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .badge {
+            margin-right: 0.25rem;
+        }
+        #loading-container {
+            display: none;
+        }
+        #progress-container {
+            display: none;
+        }
+        #error-container {
+            display: none;
+        }
+        .fade-in {
+            animation: fadeIn 0.5s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .citation-item {
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="#">arXiv Search</a>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Search Parameters</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="arxiv-search-form">
+                            <div class="mb-3">
+                                <label for="search-input" class="form-label">Search Terms</label>
+                                <input type="text" class="form-control" id="search-input" placeholder="e.g., machine learning, quantum physics" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="category-select" class="form-label">Categories (multiple selection)</label>
+                                <select class="form-select" id="category-select" multiple size="5">
+                                    <option value="cs.AI">Computer Science - Artificial Intelligence</option>
+                                    <option value="cs.LG">Computer Science - Machine Learning</option>
+                                    <option value="cs.CV">Computer Science - Computer Vision</option>
+                                    <option value="cs.CL">Computer Science - Computation and Language</option>
+                                    <option value="cs.NE">Computer Science - Neural and Evolutionary Computing</option>
+                                    <option value="physics.bio-ph">Physics - Biological Physics</option>
+                                    <option value="q-bio">Quantitative Biology</option>
+                                    <option value="q-fin">Quantitative Finance</option>
+                                    <option value="stat.ML">Statistics - Machine Learning</option>
+                                    <option value="quant-ph">Quantum Physics</option>
+                                    <option value="math.NA">Mathematics - Numerical Analysis</option>
+                                </select>
+                                <div class="form-text">Hold Ctrl/Cmd to select multiple categories</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="author-input" class="form-label">Author</label>
+                                <input type="text" class="form-control" id="author-input" placeholder="e.g., Yoshua Bengio">
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="date-from" class="form-label">From Date</label>
+                                    <input type="date" class="form-control" id="date-from">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="date-to" class="form-label">To Date</label>
+                                    <input type="date" class="form-control" id="date-to">
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="search-field" class="form-label">Search Field</label>
+                                <select class="form-select" id="search-field">
+                                    <option value="all" selected>All Fields</option>
+                                    <option value="title">Title</option>
+                                    <option value="abstract">Abstract</option>
+                                    <option value="author">Author</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="exact-match">
+                                    <label class="form-check-label" for="exact-match">
+                                        Exact Phrase Match
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="max-results" class="form-label">Max Results</label>
+                                <input type="number" class="form-control" id="max-results" min="1" max="100" value="10">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="sort-by" class="form-label">Sort By</label>
+                                <select class="form-select" id="sort-by">
+                                    <option value="submittedDate" selected>Submission Date</option>
+                                    <option value="lastUpdatedDate">Last Updated Date</option>
+                                    <option value="relevance">Relevance</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="sort-order" class="form-label">Sort Order</label>
+                                <select class="form-select" id="sort-order">
+                                    <option value="descending" selected>Descending</option>
+                                    <option value="ascending">Ascending</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="detailed-results">
+                                    <label class="form-check-label" for="detailed-results">
+                                        Show Detailed Results
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary w-100">Search</button>
+                        </form>
+                        
+                        <hr>
+                        
+                        <div class="mb-3">
+                            <label for="query-id-input" class="form-label">Load Saved Search</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="query-id-input" placeholder="Enter Query ID">
+                                <button class="btn btn-outline-secondary" type="button" id="load-saved-search">Load</button>
+                            </div>
+                        </div>
+                        
+                        <div id="download-container" class="mt-3"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-8">
+                <div id="loading-container" class="alert alert-info">
+                    <div class="d-flex align-items-center">
+                        <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                        <span id="loading-message">Searching arXiv...</span>
+                    </div>
+                </div>
+                
+                <div id="progress-container" class="mb-3">
+                    <div id="progress-message" class="mb-1">Processing...</div>
+                    <div class="progress">
+                        <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                </div>
+                
+                <div id="error-container" class="mb-3"></div>
+                
+                <div id="results-header" class="d-flex justify-content-between align-items-center mb-3">
+                    <h3 id="results-count"></h3>
+                    <div class="btn-group">
+                        <button class="btn btn-outline-primary" id="toggle-citations">Show Citations</button>
+                        <button class="btn btn-outline-primary" id="export-json">Export JSON</button>
+                    </div>
+                </div>
+                
+                <div id="query-display" class="mb-3 text-muted"></div>
+                <div id="pagination-info" class="mb-3 text-muted"></div>
+                
+                <div id="results-container"></div>
+                <div id="citations-container" style="display: none;"></div>
+                <div id="json-output" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

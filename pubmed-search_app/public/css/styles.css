@@ -1,0 +1,41 @@
+/* public/css/styles.css */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
+}
+
+.paper-card {
+    transition: transform 0.2s ease;
+    border-left: 4px solid #0d6efd;
+}
+
+.paper-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.abstract {
+    max-height: 200px;
+    overflow-y: auto;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.card-title {
+    color: #0d6efd;
+}
+
+.footer {
+    margin-top: 2rem;
+    border-top: 1px solid #dee2e6;
+}
+
+.suggestions {
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+

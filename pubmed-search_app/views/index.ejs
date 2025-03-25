@@ -1,0 +1,125 @@
+<!-- views/index.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-12">
+                <h1 class="mb-4 text-center">PubMed Research Paper Search</h1>
+                <div class="card">
+                    <div class="card-body">
+                        <form action="/search" method="POST" id="searchForm">
+                            <div class="input-group mb-3">
+                                <input 
+                                    type="text" 
+                                    class="form-control" 
+                                    name="query" 
+                                    placeholder="Enter search terms (e.g., single cell data analysis)" 
+                                    value="<%= query %>"
+                                    required
+                                >
+                                <select class="form-select" name="maxResults" style="max-width: 100px;">
+                                    <option value="5">5</option>
+                                    <option value="10" selected>10</option>
+                                    <option value="25">25</option>
+                                    <option value="50">50</option>
+                                </select>
+                                <button class="btn btn-primary" type="submit">
+                                    <i class="bi bi-search"></i> Search
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <% if (showResults) { %>
+                    <% if (error) { %>
+                        <div class="alert alert-danger mt-4">
+                            <strong>Error:</strong> <%= error %>
+                        </div>
+                    <% } else if (papers.length === 0) { %>
+                        <div class="alert alert-info mt-4">
+                            No papers found for "<%= query %>". Try different search terms.
+                        </div>
+                    <% } else { %>
+                        <h2 class="mt-4">Search Results for "<%= query %>"</h2>
+                        <div class="results-count mb-3">
+                            Found <%= papers.length %> papers
+                        </div>
+                        
+                        <div class="papers-container">
+                            <% papers.forEach((paper, index) => { %>
+                                <div class="card mb-4 paper-card">
+                                    <div class="card-header d-flex justify-content-between">
+                                        <span class="text-muted">PMID: <%= paper.pmid %></span>
+                                        <span class="text-muted"><%= paper.pubDate %></span>
+                                    </div>
+                                    <div class="card-body">
+                                        <h5 class="card-title"><%= paper.title %></h5>
+                                        <h6 class="card-subtitle mb-2 text-muted">
+                                            <strong>Authors:</strong> <%= paper.authors %>
+                                        </h6>
+                                        <p class="card-text journal">
+                                            <strong>Journal:</strong> <%= paper.journal %>
+                                        </p>
+                                        
+                                        <div class="abstract-container">
+                                            <strong>Abstract:</strong>
+                                            <p class="abstract"><%= paper.abstract %></p>
+                                        </div>
+                                        
+                                        <a href="<%= paper.url %>" class="btn btn-sm btn-primary mt-2" target="_blank">
+                                            View on PubMed
+                                        </a>
+                                    </div>
+                                </div>
+                            <% }); %>
+                        </div>
+                    <% } %>
+                <% } else { %>
+                    <div class="mt-5 text-center">
+                        <h3>Welcome to PubMed Search</h3>
+                        <p class="lead">
+                            Use the search box above to find scientific papers related to your research interests.
+                        </p>
+                        <div class="suggestions mt-4">
+                            <h5>Popular Search Topics:</h5>
+                            <div class="d-flex flex-wrap justify-content-center gap-2 mt-3">
+                                <button class="btn btn-outline-secondary quick-search" data-query="single cell data analysis">
+                                    Single Cell Data Analysis
+                                </button>
+                                <button class="btn btn-outline-secondary quick-search" data-query="spatial transcriptomics">
+                                    Spatial Transcriptomics
+                                </button>
+                                <button class="btn btn-outline-secondary quick-search" data-query="proteomics mass spectrometry">
+                                    Proteomics
+                                </button>
+                                <button class="btn btn-outline-secondary quick-search" data-query="CRISPR gene editing">
+                                    CRISPR
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer mt-5 py-3 bg-light">
+        <div class="container text-center">
+            <span class="text-muted">PubMed Search App - Created with Node.js, Express, and EJS</span>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/main.js"></script>
+</body>
+</html>
+
